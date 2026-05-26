@@ -27,56 +27,53 @@ RegisterNumber: 212224220077
 */
 ```
 ```
-
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.cluster import KMeans
-
-data = {
-    'CustomerID': [1,2,3,4,5,6,7,8,9,10],
-    'Gender': ['Male','Female','Female','Male','Female','Male','Male','Female','Female','Male'],
-    'Age': [19,21,20,23,31,22,35,30,25,28],
-    'Annual Income (k$)': [15,16,17,18,19,20,21,22,23,24],
-    'Spending Score (1-100)': [39,81,6,77,40,76,6,94,3,72]
-}
-
-df = pd.DataFrame(data)
-
+import matplotlib.pyplot as plt
+df= pd.read_csv("Mall_Customers.csv")
+df.head()
+df.info()
+df.isnull().sum()
 X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
-
-kmeans = KMeans(n_clusters=3, init='k-means++', random_state=42)
-
-df['Cluster'] = kmeans.fit_predict(X)
-
-plt.figure(figsize=(8,6))
-
-for i in range(3):
-    plt.scatter(
-        X[df['Cluster']==i]['Annual Income (k$)'],
-        X[df['Cluster']==i]['Spending Score (1-100)'],
-        label=f'Cluster {i+1}'
-    )
-
-plt.scatter(
-    kmeans.cluster_centers_[:,0],
-    kmeans.cluster_centers_[:,1],
-    s=200,
-    c='yellow',
-    label='Centroids',
-    marker='X'
-)
-
-plt.title('Customer Segmentation (K-Means)')
-plt.xlabel('Annual Income (k$)')
-plt.ylabel('Spending Score (1-100)')
-plt.legend()
+from sklearn.cluster import KMeans 
+wcss=[] 
+for i in range(1,11): 
+    kmeans=KMeans(n_clusters=i,init="k-means++",n_init=10) 
+    kmeans.fit(df.iloc[:,3:]) 
+    wcss.append(kmeans.inertia_) 
+import matplotlib.pyplot as plt
+plt.plot(range(1,11),wcss)
+plt.xlabel("No of clusters")
+plt.ylabel("wcss")
+plt.title("Elbow method")
 plt.show()
-
-print(df)
+km=KMeans(n_clusters=5,n_init=10)
+km.fit(df.iloc[:,3:])
+y_pred=km.predict(df.iloc[:,3:])
+print(y_pred)
+df["cluster"]=y_pred
+dt0=df[df["cluster"]==0]
+dt1=df[df["cluster"]==1]
+dt2=df[df["cluster"]==2]
+dt3=df[df["cluster"]==3]
+dt4=df[df["cluster"]==4] 
+plt.figure()
+plt.scatter(dt0["Annual Income (k$)"],dt0["Spending Score (1-100)"],c="red",label="cluster1") 
+plt.scatter(dt1["Annual Income (k$)"],dt1["Spending Score (1-100)"],c="black",label="cluster2")
+plt.scatter(dt2["Annual Income (k$)"],dt2["Spending Score (1-100)"],c="blue",label="cluster3")
+plt.scatter(dt3["Annual Income (k$)"],dt3["Spending Score (1-100)"],c="green",label="cluster4") 
+plt.scatter(dt4["Annual Income (k$)"],dt4["Spending Score (1-100)"],c="magenta",label="cluster5")
+plt.legend()
+plt.xlabel("Annual Income (k$)")
+plt.ylabel("Spending Score (1-100)")
+plt.title("Customer Segments")
+plt.show()
 ```
 
 ## Output:
-<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/a528fa04-d4a5-431a-a107-eb5d93d967c2" />
+<img width="1920" height="1200" alt="Screenshot (46)" src="https://github.com/user-attachments/assets/ee22fbfb-8d3d-469e-8e04-b282beff1876" />
+<img width="1920" height="1200" alt="Screenshot (47)" src="https://github.com/user-attachments/assets/8a90d285-4c75-4a13-a051-abafb16640a8" />
 
 
 
